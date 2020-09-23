@@ -26,7 +26,6 @@ async function main() {
             try {
                 let playlist = await getPLaylist({ playlistLink: link });
                 console.log(`Playlist ${playlist.title} Found. Total Items: ${playlist.total_items}`);
-                console.log(`Downloading only ${limit} videos starting from video ${offset + 1}...`);
                 let outputDir = output;
                 if(titleDir){
                     outputDir = path.join(output, playlist.title);
@@ -34,6 +33,7 @@ async function main() {
                 mkDirByPathSync(outputDir);
                 let plimit = pLimit(concurrency);
                 let actualLimit = Math.min(limit, playlist.total_items - offset);
+                console.log(`Downloading only ${actualLimit} videos starting from video ${offset + 1}...`);
                 let promises = playlist.items.slice(offset, offset + actualLimit).map((item) => {
                     return plimit(() => {
                         return downloadVideo({ title: item.title, url: item.url, outputDir, spinnies });
