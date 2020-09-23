@@ -16,5 +16,7 @@
     "ytdl-core": "^3.2.2",
     "ytpl": "^1.0.1"
   },
-  "bin": "index.js"
+  "bin": {
+    "ytdl": "index.js"
+  }
 }
