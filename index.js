@@ -15,7 +15,7 @@ async function main() {
 
     program
         .requiredOption('-l, --link <link>', 'A youtube video link or id')
-        .option('-o, --output [directory]', 'Directory of the downloaded files', __dirname)
+        .option('-o, --output [directory]', 'Directory of the downloaded files', './')
         .option('-c, --concurrency [concurrency]', 'Number of concurrent downloads', myParseInt, 5)
         .action(async (cmObj) => {
             let { link, output, concurrency } = cmObj;
