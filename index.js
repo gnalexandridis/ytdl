@@ -27,11 +27,7 @@ async function main() {
                 let spinnies = new Spinnies();
                 let promises = playlist.items.map((item) => {
                     return plimit(() => {
-                        return downloadVideo({ title: item.title, url: item.url, outputDir, spinnies })
-                            .then(r => {
-                                console.log(r);
-                                return r;
-                            });
+                        return downloadVideo({ title: item.title, url: item.url, outputDir, spinnies });
                     });
                 });
                 const result = await Promise.all(promises).then((res) => {
