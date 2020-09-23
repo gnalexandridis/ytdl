@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const pLimit = require('p-limit');
 const Spinnies = require('spinnies');
+const { Console } = require("console");
 
 
 async function main() {
@@ -18,26 +19,39 @@ async function main() {
         .option('-c, --concurrency [concurrency]', 'Number of concurrent downloads', myParseInt, 5)
         .action(async (cmObj) => {
             let { link, output, concurrency } = cmObj;
+            let spinnies = new Spinnies();
             try {
                 let playlist = await getPLaylist({ playlistLink: link });
                 console.log(`Playlist ${playlist.title} Found. Total Items: ${playlist.total_items}`);
                 let outputDir = path.join(output, playlist.title);
                 mkDirByPathSync(outputDir);
                 let plimit = pLimit(concurrency);
-                let spinnies = new Spinnies();
                 let promises = playlist.items.map((item) => {
                     return plimit(() => {
                         return downloadVideo({ title: item.title, url: item.url, outputDir, spinnies });
                     });
                 });
-                const result = await Promise.all(promises).then((res) => {
-                    console.log("Finished downloading all videos.");
-                    process.exit(0);
-                });
+                const result = await Promise.all(promises);
+                console.log(`Finished downloading ${result.length} videos.`);
+                process.exit(0);
             } catch (error) {
                 if (error.code == 404) {
-                    console.debug("Playlist not found. Trying to download video instead.", error);
-                    // TODO add video download 
+                    console.log("Playlist not found. Trying to download video instead.");
+                    try {
+                        const info = await ytdl.getBasicInfo(link);
+                        mkDirByPathSync(output);
+                        const videoResponse = await downloadVideo({
+                            title: info.videoDetails.title,
+                            url: info.videoDetails.video_url,
+                            outputDir: output,
+                            spinnies
+                        });
+                    } catch (e) {
+                        console.error("Error while trying to donwload single video", e);
+                        process.exit(1);
+                    }
+                } else {
+                    console.error("Error: ", error);
                 }
             }
         });
@@ -85,6 +99,10 @@ async function downloadVideo({ title, url, outputDir, spinnies }) {
             const message = `Finished downloading ${title}`;
             spinnies.succeed(title, { text: message });
             resolve(message);
+        });
+        video.on('error', (err) => {
+            spinnies.fail(title, { text: `Failed to download ${title}` });
+            reject(err);
         });
     });
 }
