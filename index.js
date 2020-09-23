@@ -33,7 +33,8 @@ async function main() {
                 }
                 mkDirByPathSync(outputDir);
                 let plimit = pLimit(concurrency);
-                let promises = playlist.items.slice(offset, offset + limit).map((item) => {
+                let actualLimit = Math.min(limit, playlist.total_items - offset);
+                let promises = playlist.items.slice(offset, actualLimit).map((item) => {
                     return plimit(() => {
                         return downloadVideo({ title: item.title, url: item.url, outputDir, spinnies });
                     });
