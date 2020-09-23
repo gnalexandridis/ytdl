@@ -16,17 +16,21 @@ async function main() {
     program
         .requiredOption('-l, --link <link>', 'A youtube video link or id')
         .option('-o, --output [directory]', 'Directory of the downloaded files', './')
+        .option('--title-dir', 'Add files to directory named after playlist\'s title')
         .option('-c, --concurrency [concurrency]', 'Number of concurrent downloads', myParseInt, 5)
         .option('--offset [offset]', 'First video to start downloadind from playlist', myParseInt, 0)
         .option('--limit [limit]', 'Limit of videos to download from playlist', myParseInt, Infinity)
         .action(async (cmObj) => {
-            let { link, output, concurrency, limit, offset } = cmObj;
+            let { link, output, concurrency, limit, offset, titleDir } = cmObj;
             let spinnies = new Spinnies();
             try {
                 let playlist = await getPLaylist({ playlistLink: link });
                 console.log(`Playlist ${playlist.title} Found. Total Items: ${playlist.total_items}`);
                 console.log(`Downloading only ${limit} videos starting from video ${offset + 1}...`);
-                let outputDir = path.join(output, playlist.title);
+                let outputDir = output;
+                if(titleDir){
+                    outputDir = path.join(output, playlist.title);
+                }
                 mkDirByPathSync(outputDir);
                 let plimit = pLimit(concurrency);
                 let promises = playlist.items.slice(offset, offset + limit).map((item) => {
