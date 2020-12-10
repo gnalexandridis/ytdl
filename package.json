@@ -12,9 +12,10 @@
   "dependencies": {
     "commander": "^6.1.0",
     "p-limit": "^3.0.2",
+    "sanitize-filename": "^1.6.3",
     "spinnies": "^0.5.1",
-    "ytdl-core": "^3.2.2",
-    "ytpl": "^1.0.1"
+    "ytdl-core": "^4.1.4",
+    "ytpl": "^2.0.0-alpha.3"
   },
   "bin": {
     "ytdl": "index.js"
